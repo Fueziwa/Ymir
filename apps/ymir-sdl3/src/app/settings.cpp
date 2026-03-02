@@ -785,6 +785,8 @@ Settings::Settings(SharedContext &sharedCtx) noexcept
     mapInput(m_actionInputs, hotkeys.dumpMemory);
 
     mapInput(m_actionInputs, hotkeys.turboToggleMode);
+    mapInput(m_actionInputs, hotkeys.turboSpeedMode);
+    mapInput(m_actionInputs, hotkeys.turboCycleGlobalSpeed);
 
     mapInput(m_actionInputs, hotkeys.saveStates.quickLoad);
     mapInput(m_actionInputs, hotkeys.saveStates.quickSave);
@@ -1272,6 +1274,8 @@ SettingsLoadResult Settings::Load(const std::filesystem::path &path) {
         Parse(tblHotkeys, "DumpMemory", hotkeys.dumpMemory);
 
         Parse(tblHotkeys, "TurboToggleMode", hotkeys.turboToggleMode);
+        Parse(tblHotkeys, "TurboSpeedMode", hotkeys.turboSpeedMode);
+        Parse(tblHotkeys, "TurboCycleGlobalSpeed", hotkeys.turboCycleGlobalSpeed);
 
         if (auto tblSaveStates = tblHotkeys["SaveStates"]) {
             Parse(tblSaveStates, "QuickLoadState", hotkeys.saveStates.quickLoad);
@@ -1876,6 +1880,8 @@ SettingsSaveResult Settings::Save() {
             {"DumpMemory", ToTOML(hotkeys.dumpMemory)},
 
             {"TurboToggleMode", ToTOML(hotkeys.turboToggleMode)},
+            {"TurboSpeedMode", ToTOML(hotkeys.turboSpeedMode)},
+            {"TurboCycleGlobalSpeed", ToTOML(hotkeys.turboCycleGlobalSpeed)},
 
             {"SaveStates", toml::table{{
                 {"QuickLoadState", ToTOML(hotkeys.saveStates.quickLoad)},
@@ -2269,6 +2275,8 @@ std::unordered_set<input::MappedAction> Settings::ResetHotkeys() {
     rebindCtx.Rebind(hotkeys.dumpMemory, {KeyCombo{Mod::Control, Key::F11}});
 
     rebindCtx.Rebind(hotkeys.turboToggleMode, {KeyCombo{Mod::None, Key::T}});
+    rebindCtx.Rebind(hotkeys.turboSpeedMode, {KeyCombo{Mod::None, Key::Y}});
+    rebindCtx.Rebind(hotkeys.turboCycleGlobalSpeed, {KeyCombo{Mod::Shift, Key::T}});
 
     rebindCtx.Rebind(hotkeys.saveStates.quickLoad, {KeyCombo{Mod::None, Key::F3}});
     rebindCtx.Rebind(hotkeys.saveStates.quickSave, {KeyCombo{Mod::None, Key::F2}});

@@ -242,6 +242,8 @@ struct Settings {
         input::InputBind dumpMemory{actions::dbg::DumpMemory};
 
         input::InputBind turboToggleMode{actions::turbo::ToggleMode};
+        input::InputBind turboSpeedMode{actions::turbo::SpeedMode};
+        input::InputBind turboCycleGlobalSpeed{actions::turbo::CycleGlobalSpeed};
 
         struct SaveStates {
             input::InputBind quickLoad{actions::save_states::QuickLoadState};

@@ -174,6 +174,8 @@ namespace dbg {
 namespace turbo {
 
     DEF_ACTION(ToggleMode)::Trigger(ACTION_ID, "Turbo", "Toggle turbo configuration mode");
+    DEF_ACTION(SpeedMode)::Trigger(ACTION_ID, "Turbo", "Toggle turbo speed configuration mode");
+    DEF_ACTION(CycleGlobalSpeed)::Trigger(ACTION_ID, "Turbo", "Cycle global turbo speed preset");
 
 } // namespace turbo
 

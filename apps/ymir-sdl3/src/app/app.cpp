@@ -563,6 +563,7 @@ void App::RunEmulator() {
             screen.frameInterval =
                 std::chrono::duration_cast<clk::duration>(std::chrono::duration<double>(sys::kNTSCFrameInterval));
         }
+        m_turboEngine.SetVideoStandard(standard);
     });
 
     // ---------------------------------
@@ -1386,6 +1387,15 @@ void App::RunEmulator() {
             bool active = !m_turboEngine.IsToggleModeActive();
             m_turboEngine.SetToggleMode(active);
         });
+
+        inputContext.SetTriggerHandler(actions::turbo::SpeedMode, [this](void *, const input::InputElement &) {
+            bool active = !m_turboEngine.IsSpeedModeActive();
+            m_turboEngine.SetSpeedMode(active);
+        });
+
+        inputContext.SetTriggerHandler(actions::turbo::CycleGlobalSpeed, [this](void *, const input::InputElement &) {
+            m_turboEngine.CycleGlobalSpeed();
+        });
     }
 
     // Saturn Control Pad
@@ -1397,6 +1407,12 @@ void App::RunEmulator() {
                 if (m_turboEngine.IsToggleModeActive()) {
                     if (actuated) {
                         m_turboEngine.ToggleTurbo(button);
+                    }
+                    return;
+                }
+                if (m_turboEngine.IsSpeedModeActive()) {
+                    if (actuated) {
+                        m_turboEngine.CycleButtonSpeed(button);
                     }
                     return;
                 }
