@@ -563,7 +563,8 @@ void App::RunEmulator() {
             screen.frameInterval =
                 std::chrono::duration_cast<clk::duration>(std::chrono::duration<double>(sys::kNTSCFrameInterval));
         }
-        m_turboEngine.SetVideoStandard(standard);
+        for (auto &engine : m_turboEngines)
+            engine.SetVideoStandard(standard);
     });
 
     // ---------------------------------
@@ -1384,17 +1385,20 @@ void App::RunEmulator() {
     // Turbo
     {
         inputContext.SetTriggerHandler(actions::turbo::ToggleMode, [this](void *, const input::InputElement &) {
-            bool active = !m_turboEngine.IsToggleModeActive();
-            m_turboEngine.SetToggleMode(active);
+            bool active = !m_turboEngines[0].IsToggleModeActive();
+            for (auto &engine : m_turboEngines)
+                engine.SetToggleMode(active);
         });
 
         inputContext.SetTriggerHandler(actions::turbo::SpeedMode, [this](void *, const input::InputElement &) {
-            bool active = !m_turboEngine.IsSpeedModeActive();
-            m_turboEngine.SetSpeedMode(active);
+            bool active = !m_turboEngines[0].IsSpeedModeActive();
+            for (auto &engine : m_turboEngines)
+                engine.SetSpeedMode(active);
         });
 
         inputContext.SetTriggerHandler(actions::turbo::CycleGlobalSpeed, [this](void *, const input::InputElement &) {
-            m_turboEngine.CycleGlobalSpeed();
+            for (auto &engine : m_turboEngines)
+                engine.CycleGlobalSpeed();
         });
     }
 
@@ -1404,15 +1408,16 @@ void App::RunEmulator() {
 
         auto registerButton = [&](input::Action action, Button button) {
             inputContext.SetButtonHandler(action, [=, this](void *context, const input::InputElement &, bool actuated) {
-                if (m_turboEngine.IsToggleModeActive()) {
+                int portIndex = (context == &m_context.controlPadInputs[0]) ? 0 : 1;
+                if (m_turboEngines[0].IsToggleModeActive()) {
                     if (actuated) {
-                        m_turboEngine.ToggleTurbo(button);
+                        m_turboEngines[portIndex].ToggleTurbo(button);
                     }
                     return;
                 }
-                if (m_turboEngine.IsSpeedModeActive()) {
+                if (m_turboEngines[0].IsSpeedModeActive()) {
                     if (actuated) {
-                        m_turboEngine.CycleButtonSpeed(button);
+                        m_turboEngines[portIndex].CycleButtonSpeed(button);
                     }
                     return;
                 }
@@ -1473,7 +1478,20 @@ void App::RunEmulator() {
         using Button = peripheral::Button;
 
         auto registerButton = [&](input::Action action, Button button) {
-            inputContext.SetButtonHandler(action, [=](void *context, const input::InputElement &, bool actuated) {
+            inputContext.SetButtonHandler(action, [=, this](void *context, const input::InputElement &, bool actuated) {
+                int portIndex = (context == &m_context.analogPadInputs[0]) ? 0 : 1;
+                if (m_turboEngines[0].IsToggleModeActive()) {
+                    if (actuated) {
+                        m_turboEngines[portIndex].ToggleTurbo(button);
+                    }
+                    return;
+                }
+                if (m_turboEngines[0].IsSpeedModeActive()) {
+                    if (actuated) {
+                        m_turboEngines[portIndex].CycleButtonSpeed(button);
+                    }
+                    return;
+                }
                 auto &input = *reinterpret_cast<SharedContext::AnalogPadInput *>(context);
                 if (actuated) {
                     input.buttons &= ~button;
@@ -4003,7 +4021,8 @@ void App::EmulatorThread() {
             }
 
             if (doRunFrame) [[likely]] {
-                m_turboEngine.AdvanceFrame();
+                for (auto &engine : m_turboEngines)
+                    engine.AdvanceFrame();
                 m_context.saturn.instance->RunFrame();
             }
 
@@ -5043,18 +5062,14 @@ void App::ReadPeripheral(ymir::peripheral::PeripheralReport &report) {
     // TODO: this is the appropriate location to capture inputs for a movie recording
     switch (report.type) {
     case ymir::peripheral::PeripheralType::ControlPad:
-        if constexpr (port == 1) {
-            report.report.controlPad.buttons =
-                m_turboEngine.Apply(m_context.controlPadInputs[0].buttons);
-        } else {
-            report.report.controlPad.buttons = m_context.controlPadInputs[port - 1].buttons;
-        }
+        report.report.controlPad.buttons =
+            m_turboEngines[port - 1].Apply(m_context.controlPadInputs[port - 1].buttons);
         break;
     case ymir::peripheral::PeripheralType::AnalogPad: //
     {
         auto &specificReport = report.report.analogPad;
         const auto &inputs = m_context.analogPadInputs[port - 1];
-        specificReport.buttons = inputs.buttons;
+        specificReport.buttons = m_turboEngines[port - 1].Apply(inputs.buttons);
         specificReport.analog = inputs.analogMode;
         specificReport.x = std::clamp(inputs.x * 128.0f + 128.0f, 0.0f, 255.0f);
         specificReport.y = std::clamp(inputs.y * 128.0f + 128.0f, 0.0f, 255.0f);

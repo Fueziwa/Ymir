@@ -64,7 +64,7 @@ private:
     services::SaveStateService m_saveStateService;
     services::MIDIService m_midiService;
     Settings m_settings;
-    input::TurboEngine m_turboEngine;
+    std::array<input::TurboEngine, 2> m_turboEngines;
 
     SDL_PropertiesID m_fileDialogProps;
 
