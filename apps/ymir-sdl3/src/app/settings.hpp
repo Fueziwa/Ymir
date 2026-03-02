@@ -241,6 +241,8 @@ struct Settings {
         input::InputBind toggleDebugTrace{actions::dbg::ToggleDebugTrace};
         input::InputBind dumpMemory{actions::dbg::DumpMemory};
 
+        input::InputBind turboToggleMode{actions::turbo::ToggleMode};
+
         struct SaveStates {
             input::InputBind quickLoad{actions::save_states::QuickLoadState};
             input::InputBind quickSave{actions::save_states::QuickSaveState};

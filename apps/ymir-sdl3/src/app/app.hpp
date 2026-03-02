@@ -5,6 +5,8 @@
 #include "settings.hpp"
 #include "shared_context.hpp"
 
+#include "input/turbo_engine.hpp"
+
 #include "services/graphics_service.hpp"
 #include "services/midi_service.hpp"
 #include "services/save_state_service.hpp"
@@ -62,6 +64,7 @@ private:
     services::SaveStateService m_saveStateService;
     services::MIDIService m_midiService;
     Settings m_settings;
+    input::TurboEngine m_turboEngine;
 
     SDL_PropertiesID m_fileDialogProps;
 

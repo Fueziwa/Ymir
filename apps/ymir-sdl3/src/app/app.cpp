@@ -1380,12 +1380,26 @@ void App::RunEmulator() {
         });
     }
 
+    // Turbo
+    {
+        inputContext.SetTriggerHandler(actions::turbo::ToggleMode, [this](void *, const input::InputElement &) {
+            bool active = !m_turboEngine.IsToggleModeActive();
+            m_turboEngine.SetToggleMode(active);
+        });
+    }
+
     // Saturn Control Pad
     {
         using Button = peripheral::Button;
 
         auto registerButton = [&](input::Action action, Button button) {
-            inputContext.SetButtonHandler(action, [=](void *context, const input::InputElement &, bool actuated) {
+            inputContext.SetButtonHandler(action, [=, this](void *context, const input::InputElement &, bool actuated) {
+                if (m_turboEngine.IsToggleModeActive()) {
+                    if (actuated) {
+                        m_turboEngine.ToggleTurbo(button);
+                    }
+                    return;
+                }
                 auto &input = *reinterpret_cast<SharedContext::ControlPadInput *>(context);
                 if (actuated) {
                     input.buttons &= ~button;
@@ -3973,6 +3987,7 @@ void App::EmulatorThread() {
             }
 
             if (doRunFrame) [[likely]] {
+                m_turboEngine.AdvanceFrame();
                 m_context.saturn.instance->RunFrame();
             }
 
@@ -5012,7 +5027,12 @@ void App::ReadPeripheral(ymir::peripheral::PeripheralReport &report) {
     // TODO: this is the appropriate location to capture inputs for a movie recording
     switch (report.type) {
     case ymir::peripheral::PeripheralType::ControlPad:
-        report.report.controlPad.buttons = m_context.controlPadInputs[port - 1].buttons;
+        if constexpr (port == 1) {
+            report.report.controlPad.buttons =
+                m_turboEngine.Apply(m_context.controlPadInputs[0].buttons);
+        } else {
+            report.report.controlPad.buttons = m_context.controlPadInputs[port - 1].buttons;
+        }
         break;
     case ymir::peripheral::PeripheralType::AnalogPad: //
     {

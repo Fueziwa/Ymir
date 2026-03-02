@@ -171,6 +171,12 @@ namespace dbg {
 
 } // namespace dbg
 
+namespace turbo {
+
+    DEF_ACTION(ToggleMode)::Trigger(ACTION_ID, "Turbo", "Toggle turbo configuration mode");
+
+} // namespace turbo
+
 namespace control_pad {
 
     DEF_ACTION(A)::Button(ACTION_ID, "Saturn Control Pad", "A");

@@ -784,6 +784,8 @@ Settings::Settings(SharedContext &sharedCtx) noexcept
     mapInput(m_actionInputs, hotkeys.toggleDebugTrace);
     mapInput(m_actionInputs, hotkeys.dumpMemory);
 
+    mapInput(m_actionInputs, hotkeys.turboToggleMode);
+
     mapInput(m_actionInputs, hotkeys.saveStates.quickLoad);
     mapInput(m_actionInputs, hotkeys.saveStates.quickSave);
 
@@ -1268,6 +1270,8 @@ SettingsLoadResult Settings::Load(const std::filesystem::path &path) {
 
         Parse(tblHotkeys, "ToggleDebugTrace", hotkeys.toggleDebugTrace);
         Parse(tblHotkeys, "DumpMemory", hotkeys.dumpMemory);
+
+        Parse(tblHotkeys, "TurboToggleMode", hotkeys.turboToggleMode);
 
         if (auto tblSaveStates = tblHotkeys["SaveStates"]) {
             Parse(tblSaveStates, "QuickLoadState", hotkeys.saveStates.quickLoad);
@@ -1871,6 +1875,8 @@ SettingsSaveResult Settings::Save() {
             {"ToggleDebugTrace", ToTOML(hotkeys.toggleDebugTrace)},
             {"DumpMemory", ToTOML(hotkeys.dumpMemory)},
 
+            {"TurboToggleMode", ToTOML(hotkeys.turboToggleMode)},
+
             {"SaveStates", toml::table{{
                 {"QuickLoadState", ToTOML(hotkeys.saveStates.quickLoad)},
                 {"QuickSaveState", ToTOML(hotkeys.saveStates.quickSave)},
@@ -2261,6 +2267,8 @@ std::unordered_set<input::MappedAction> Settings::ResetHotkeys() {
 
     rebindCtx.Rebind(hotkeys.toggleDebugTrace, {KeyCombo{Mod::None, Key::F11}});
     rebindCtx.Rebind(hotkeys.dumpMemory, {KeyCombo{Mod::Control, Key::F11}});
+
+    rebindCtx.Rebind(hotkeys.turboToggleMode, {KeyCombo{Mod::None, Key::T}});
 
     rebindCtx.Rebind(hotkeys.saveStates.quickLoad, {KeyCombo{Mod::None, Key::F3}});
     rebindCtx.Rebind(hotkeys.saveStates.quickSave, {KeyCombo{Mod::None, Key::F2}});
